@@ -16,6 +16,7 @@ def search_scholar(query: str, max_results: int = 20, delay: float = 2.0) -> lis
         if index >= max_results:
             break
         bib = pub.get("bib", {})
+        venue = bib.get("venue") or bib.get("journal") or bib.get("conference")
         papers.append(
             {
                 "title": bib.get("title"),
@@ -25,6 +26,7 @@ def search_scholar(query: str, max_results: int = 20, delay: float = 2.0) -> lis
                 "url": pub.get("pub_url") or pub.get("eprint_url"),
                 "source": "google_scholar",
                 "citations": pub.get("num_citations", 0),
+                "venue": venue,
             }
         )
         if delay > 0 and index + 1 < max_results:

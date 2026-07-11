@@ -44,7 +44,7 @@ def _extract_doi(value: str) -> str | None:
 
 def resolve_paper(query: str) -> dict | None:
     """Resolve a paper query to Semantic Scholar metadata."""
-    fields = "paperId,title,authors,year,citationCount,externalIds,url,abstract"
+    fields = "paperId,title,authors,year,citationCount,externalIds,url,abstract,venue,publicationVenue,journal"
     arxiv_id = _extract_arxiv_id(query)
     if arxiv_id:
         data = _request_json(f"{SEMANTIC_SCHOLAR_API}/paper/arXiv:{arxiv_id}?fields={fields}")
@@ -76,6 +76,37 @@ def connected_papers_url(title: str | None, paper_id: str | None = None) -> str:
     return f"https://www.connectedpapers.com/search?q={encoded}"
 
 
+def _extract_venue_from_paper(paper: dict | Any) -> str | None:
+    if isinstance(paper, dict):
+        venue = paper.get("venue")
+        if isinstance(venue, str) and venue.strip():
+            return venue.strip()
+        publication_venue = paper.get("publicationVenue")
+        if isinstance(publication_venue, dict):
+            name = publication_venue.get("name")
+            if name:
+                return name
+        journal = paper.get("journal")
+        if isinstance(journal, dict):
+            name = journal.get("name")
+            if name:
+                return name
+        journal_name = getattr(paper, "journalName", None)
+        if journal_name:
+            return journal_name
+        venue_name = getattr(paper, "venue", None)
+        if venue_name:
+            return venue_name
+    else:
+        journal_name = getattr(paper, "journalName", None)
+        if journal_name:
+            return journal_name
+        venue_name = getattr(paper, "venue", None)
+        if venue_name:
+            return venue_name
+    return None
+
+
 def _paper_summary(paper: Any, citations: int | None = None) -> dict:
     authors = []
     raw_authors = getattr(paper, "authors", None) or paper.get("authors", [])
@@ -93,6 +124,7 @@ def _paper_summary(paper: Any, citations: int | None = None) -> dict:
             "citations": citations if citations is not None else paper.get("citationCount"),
             "url": paper.get("url"),
             "paper_id": paper.get("paperId") or paper.get("id") or paper.get("paper_id"),
+            "venue": _extract_venue_from_paper(paper),
         }
 
     return {
@@ -102,6 +134,7 @@ def _paper_summary(paper: Any, citations: int | None = None) -> dict:
         "citations": citations,
         "url": getattr(paper, "url", None),
         "paper_id": getattr(paper, "paperId", None) or getattr(paper, "id", None),
+        "venue": _extract_venue_from_paper(paper),
     }
 
 
@@ -160,7 +193,7 @@ def _collect_related_from_graph(graph: Any, origin_id: str) -> list[dict]:
 
 
 def _fetch_semantic_scholar_citations(origin_id: str, limit: int = 1000) -> list[dict]:
-    fields = "title,authors,year,citationCount,url,paperId"
+    fields = "title,authors,year,citationCount,url,paperId,venue,publicationVenue,journal"
     data = _request_json(
         f"{SEMANTIC_SCHOLAR_API}/paper/{origin_id}/citations?fields={fields}&limit={limit}"
     )
@@ -203,6 +236,7 @@ def search_connected_papers(query: str, related_limit: int = 5) -> dict:
             "citations": origin.get("citationCount"),
             "url": origin.get("url"),
             "paper_id": origin_id,
+            "venue": _extract_venue_from_paper(origin),
         },
         "connected_papers_url": connected_papers_url(origin.get("title"), origin_id),
         "related_papers": [],

@@ -36,6 +36,8 @@ def _merge_papers(arxiv_papers: list[dict], scholar_papers: list[dict]) -> list[
             existing = merged[key]
             existing["sources"] = sorted(set(existing.get("sources", []) + ["google_scholar"]))
             existing["citations"] = paper.get("citations")
+            if not existing.get("venue") and paper.get("venue"):
+                existing["venue"] = paper.get("venue")
             if not existing.get("url"):
                 existing["url"] = paper.get("url")
             if not existing.get("summary") and paper.get("summary"):

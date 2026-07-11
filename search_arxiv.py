@@ -8,6 +8,30 @@ import json
 import arxiv
 
 
+def _extract_venue(result: arxiv.Result) -> str | None:
+    if result.journal_ref:
+        return result.journal_ref.strip()
+    if result.comment:
+        comment = result.comment.strip()
+        lowered = comment.lower()
+        if any(
+            keyword in lowered
+            for keyword in (
+                "accepted",
+                "appeared",
+                "published",
+                "proceedings",
+                "conference",
+                "journal",
+                "workshop",
+                "symposium",
+                "transactions",
+            )
+        ):
+            return comment
+    return None
+
+
 def search_arxiv(query: str, max_results: int = 20) -> list[dict]:
     client = arxiv.Client()
     search = arxiv.Search(
@@ -28,6 +52,7 @@ def search_arxiv(query: str, max_results: int = 20) -> list[dict]:
                 "arxiv_id": result.get_short_id(),
                 "source": "arxiv",
                 "citations": None,
+                "venue": _extract_venue(result),
             }
         )
     return papers
