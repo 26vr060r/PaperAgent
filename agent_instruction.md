@@ -44,6 +44,41 @@
      - **Citations**
      - URL
 5. `reports/YYYY-MM-DD_キーワード.md` というフォーマットで成果物ファイルを作成する。
+6. `README.md` の「レポート一覧」テーブルに、新規レポートの行を追加する（既存行の更新が必要な場合は更新する）。
+
+## GitHub への反映（必須）
+
+調査完了の条件は **レポートファイルの作成と GitHub への push まで** です。チャット回答のみで終了してはならない。
+
+1. 作業開始時に最新の `main` を取得する。
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+2. 作業用ブランチを作成する（ブランチ名は `cursor/<説明的な名前>-b813` 形式）。
+   ```bash
+   git checkout -b cursor/<説明的な名前>-b813
+   ```
+3. 成果物をステージングする。
+   ```bash
+   git add reports/ README.md
+   ```
+   `agent_instruction.md` を変更した場合はそれも `git add` する。
+4. コミットする。
+   ```bash
+   git commit -m "Add research report: <テーマの短い説明>"
+   ```
+5. リモートへ push する。
+   ```bash
+   git push -u origin cursor/<説明的な名前>-b813
+   ```
+6. `main` をベースに **Pull Request を作成** する（draft で可）。
+7. 完了前に以下を確認する。
+   - `reports/YYYY-MM-DD_キーワード.md` が存在する
+   - `git status` が clean である
+   - PR が作成されている
+
+`reports/` にファイルが存在しない状態は **未完了** とみなす。
 
 ## レポート出力フォーマット（各論文）
 

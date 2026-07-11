@@ -28,7 +28,7 @@ python search_papers.py "multi-agent network"
 python search_connected_papers.py "Attention Is All You Need"
 ```
 
-レポートには各論文の **発表元（査読付き）**、**被引用数**（Google Scholar）、**Citations**（Connected Papers）、および Citations 順の関連論文 5 件を必ず記載します。
+レポートには各論文の **発表元（査読付き）**、**被引用数**（Google Scholar）、**Citations**（Connected Papers）、および Citations 順の関連論文 5 件を必ず記載します。調査完了後は `agent_instruction.md` の「GitHub への反映（必須）」に従い、commit / push / PR まで行います。
 
 ## レポート一覧
 
