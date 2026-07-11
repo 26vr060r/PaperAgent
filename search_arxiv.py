@@ -1,10 +1,52 @@
-# 論文収集エージェントへの指示
+"""Search arXiv for papers matching a query."""
 
-あなたは指定されたキーワードに基づいて最新の論文を調査し、日本語で要約レポートを作成する自律型エージェントです。
+from __future__ import annotations
 
-## 実行手順
+import argparse
+import json
 
-1. 指定されたキーワードを用いて論文（arXiv 等）を検索する。
-2. ヒットした論文の中から、特に重要または最新のものを最大 5 本ピックアップする。
-3. 各論文の「タイトル」「著者」「公開日」「要約（Abstract の日本語訳・要約）」を整理する。
-4. `reports/YYYY-MM-DD_キーワード.md` というフォーマットで成果物ファイルを作成する。
+import arxiv
+
+
+def search_arxiv(query: str, max_results: int = 20) -> list[dict]:
+    client = arxiv.Client()
+    search = arxiv.Search(
+        query=query,
+        max_results=max_results,
+        sort_by=arxiv.SortCriterion.SubmittedDate,
+    )
+    papers: list[dict] = []
+    for result in client.results(search):
+        published = result.published
+        papers.append(
+            {
+                "title": result.title,
+                "authors": [author.name for author in result.authors],
+                "published": published.strftime("%Y-%m-%d") if published else None,
+                "summary": result.summary.replace("\n", " ").strip(),
+                "url": result.entry_id,
+                "arxiv_id": result.get_short_id(),
+                "source": "arxiv",
+                "citations": None,
+            }
+        )
+    return papers
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Search arXiv for papers.")
+    parser.add_argument("query", help="Search keywords")
+    parser.add_argument(
+        "--max-results",
+        type=int,
+        default=20,
+        help="Maximum number of results (default: 20)",
+    )
+    args = parser.parse_args()
+
+    papers = search_arxiv(args.query, max_results=args.max_results)
+    print(json.dumps(papers, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
