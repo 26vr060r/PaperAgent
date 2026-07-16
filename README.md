@@ -35,3 +35,4 @@ python search_connected_papers.py "Attention Is All You Need"
 | 日付 | テーマ | ファイル |
 |------|--------|---------|
 | 2026-07-11 | AIエージェントの発展に伴うネットワーク影響 | [reports/2026-07-11_AIエージェントNW影響.md](reports/2026-07-11_AIエージェントNW影響.md) |
+| 2026-07-16 | AgentSociety型AI社会シミュレーションとNW需要予測 | [reports/2026-07-16_AI社会シミュレーションNW需要予測.md](reports/2026-07-16_AI社会シミュレーションNW需要予測.md) |
